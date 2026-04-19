@@ -1,0 +1,83 @@
+###############################################################
+# TRADETRUST — App Stack
+#
+# Services:
+#   - Nginx    → http://localhost:2026  (single entry point)
+#   - Backend  → http://localhost:8080  (also directly accessible)
+#   - Frontend → http://localhost:3000  (also directly accessible)
+#
+# Nginx routes:
+#   /          → frontend:3000
+#   /api/      → backend:8080
+#   /supabase/ → supabase-kong:8000
+#
+# Supabase runs separately:
+#   cd supabase/docker && docker compose up -d
+###############################################################
+
+networks:
+  supastack_network:
+    driver: bridge
+  supabase_default:
+    external: true   # Supabase network — lets backend reach supabase-db directly
+
+services:
+
+  ###############################################################
+  # NGINX — reverse proxy (single entry point)
+  # App → http://localhost:2026
+  ###############################################################
+  nginx:
+    image: nginx:alpine
+    container_name: supastack_nginx
+    restart: unless-stopped
+    ports:
+      - "2026:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - supastack_network
+      - supabase_default
+
+  ###############################################################
+  # FASTAPI BACKEND
+  # API Docs → http://localhost:8080/docs
+  ###############################################################
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: supastack_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - supastack_network
+      - supabase_default
+    volumes:
+      - ./backend:/app
+
+  ###############################################################
+  # REACT FRONTEND (Vite dev server)
+  # Direct → http://localhost:3000
+  ###############################################################
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: supastack_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    networks:
+      - supastack_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
