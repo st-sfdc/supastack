@@ -145,24 +145,38 @@ docker compose up -d
 
 ## Deploying / Updating
 
+Three modes depending on what changed:
+
 ```bash
-bash deploy.sh
+bash deploy.sh             # Fast    — git pull + migrations + restart app containers
+bash deploy.sh --rebuild   # Rebuild — git pull + migrations + rebuild app images (no Supabase restart)
+bash deploy.sh --full      # Full    — rebuild everything including Supabase restart
 ```
 
-Pulls the latest code, applies any new migrations, and restarts the app stack. Safe to run on every update.
+- **Fast** — routine code pushes, no Dockerfile or config changes
+- **Rebuild** — `nginx.conf`, `Dockerfile`, `requirements.txt`, or `package.json` changed
+- **Full** — Supabase config or `.env` changed; first deploy on a new server
+
+To stop all stacks gracefully (no data loss):
+
+```bash
+bash stop.sh
+```
 
 ---
 
 ## Project Structure
 
 ```
-supa-stack/
+supastack/
 ├── docker-compose.yaml         # App stack (Nginx + Backend + Frontend)
 ├── .env.example                # Environment template → copy to .env
 ├── .env                        # Your secrets (never commit!)
-├── setup.sh                    # First-time setup
-├── deploy.sh                   # Pull latest code + restart
-├── init-database.sh            # Applies all DB migrations
+├── setup.sh                    # First-time setup (Supabase + app)
+├── deploy.sh                   # Deploy: fast / --rebuild / --full
+├── stop.sh                     # Graceful shutdown of all stacks
+├── init-database.sh            # Apply DB migrations
+├── reset-database.sh           # Drop app tables + re-apply migrations (dev)
 │
 ├── nginx/
 │   └── nginx.conf              # Reverse proxy config (single entry point)
@@ -264,6 +278,16 @@ curl -X DELETE http://localhost:2026/api/items/1
 ## Useful Commands
 
 ```bash
+# --- Deployment ---
+bash deploy.sh                            # fast deploy (restart containers)
+bash deploy.sh --rebuild                  # rebuild app images, skip Supabase
+bash deploy.sh --full                     # full rebuild including Supabase restart
+bash stop.sh                              # stop all stacks gracefully
+
+# --- Database ---
+bash init-database.sh                     # apply all migrations
+bash reset-database.sh                    # drop app tables + re-apply migrations
+
 # --- App Stack ---
 docker compose up -d                      # start all services
 docker compose up -d --build backend      # rebuild and start backend
@@ -283,25 +307,24 @@ docker compose exec db psql -U postgres   # direct DB shell
 # --- Secrets rotation ---
 cd supabase/docker
 sh ./utils/generate-keys.sh               # regenerate all keys into .env
-# Then update ANON_KEY + VITE_SUPABASE_ANON_KEY in supa-stack/.env
+# Then update ANON_KEY + VITE_SUPABASE_ANON_KEY in .env
 ```
 
 ---
 
-## Open Items / Next Steps
+## Governance
 
-- [x] React + TypeScript frontend with key-value store demo
-- [x] FastAPI backend with full CRUD API
-- [x] Nginx single entry point (frontend + backend + Supabase)
-- [x] Supabase Auth routed through Nginx (no hardcoded URLs)
-- [x] Automated setup (`setup.sh`) and deploy (`deploy.sh`) scripts
-- [x] Database migration pattern (`db-migrations/` + `init-database.sh`)
-- [ ] CI/CD pipeline (GitHub Actions → auto deploy to VPS)
-- [ ] PostgreSQL backup strategy
-- [ ] Monitoring (e.g. Uptime Kuma)
+SupaStack is designed to be used with [SupaFactory](https://github.com/st-sfdc/supafactory) — a lightweight framework for AI-assisted product development.
 
----
+SupaFactory provides:
+- Agent roles (Planner, Architect, Backend Implementer, Frontend Implementer, Reviewer)
+- Governance rules and approval gates
+- Architecture document templates (`architecture.md`, `data-model.md`, `backend-interface.md`, `product.md`, `decisions.md`)
 
-## Architecture Decisions
+To use it, clone or copy the supafactory repository into a `supafactory/` folder in your project:
 
-See [architecture_template.md](./architecture_template.md)
+```bash
+git clone https://github.com/st-sfdc/supafactory.git supafactory
+```
+
+Then fill in the architecture templates before starting implementation.
