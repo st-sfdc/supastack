@@ -4,6 +4,25 @@ A replicable full-stack template: React frontend, FastAPI backend, Supabase (sel
 
 ---
 
+## Governance
+
+SupaStack is designed to be used with [SupaFactory](https://github.com/st-sfdc/supafactory) — a lightweight framework for AI-assisted product development.
+
+SupaFactory provides:
+- Agent roles (Planner, Architect, Backend Implementer, Frontend Implementer, Reviewer)
+- Governance rules and approval gates
+- Architecture document templates (`architecture.md`, `data-model.md`, `backend-interface.md`, `product.md`, `decisions.md`)
+
+To use it, clone or copy the supafactory repository into a `supafactory/` folder in your project:
+
+```bash
+git clone https://github.com/st-sfdc/supafactory.git supafactory
+```
+
+Then fill in the architecture templates before starting implementation.
+
+---
+
 ## Architecture
 
 Two separate Docker Compose projects. Nginx is the single entry point — the browser never talks to the backend, Supabase, or Vite directly.
@@ -140,6 +159,7 @@ docker compose up -d
 | App               | http://localhost:2026          |
 | Backend + Swagger | http://localhost:2026/api/docs |
 | Supabase Studio   | http://localhost:8000          |
+
 
 ---
 
@@ -309,22 +329,3 @@ cd supabase/docker
 sh ./utils/generate-keys.sh               # regenerate all keys into .env
 # Then update ANON_KEY + VITE_SUPABASE_ANON_KEY in .env
 ```
-
----
-
-## Governance
-
-SupaStack is designed to be used with [SupaFactory](https://github.com/st-sfdc/supafactory) — a lightweight framework for AI-assisted product development.
-
-SupaFactory provides:
-- Agent roles (Planner, Architect, Backend Implementer, Frontend Implementer, Reviewer)
-- Governance rules and approval gates
-- Architecture document templates (`architecture.md`, `data-model.md`, `backend-interface.md`, `product.md`, `decisions.md`)
-
-To use it, clone or copy the supafactory repository into a `supafactory/` folder in your project:
-
-```bash
-git clone https://github.com/st-sfdc/supafactory.git supafactory
-```
-
-Then fill in the architecture templates before starting implementation.
