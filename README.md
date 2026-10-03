@@ -30,6 +30,8 @@ Database, API, authorization and infrastructure changes retain the full workflow
 Commit, push and deployment still require their applicable explicit approvals.
 When using a copied or pinned SupaFactory version, include this rule before
 applying the reduced workflow; framework updates do not update existing copies.
+For every change size, existing task records hold only short check results and
+material failures/findings; full logs and UI-test protocols stay in PR/CI.
 
 ---
 
