@@ -21,6 +21,18 @@ git clone https://github.com/st-sfdc/supafactory.git supafactory
 
 Then fill in the architecture templates before starting implementation.
 
+For small reversible UI changes, use SupaFactory's
+[reduced change workflow](https://github.com/st-sfdc/supafactory/blob/HEAD/governance/change-control.md#small-reversible-ui-changes):
+a short approved scope in the conversation, appropriate checks, one implementation
+commit where practical and concise evidence in the PR. Separate scope/task files
+and documentation-only verification commits are not required for this workflow.
+Database, API, authorization and infrastructure changes retain the full workflow.
+Commit, push and deployment still require their applicable explicit approvals.
+When using a copied or pinned SupaFactory version, include this rule before
+applying the reduced workflow; framework updates do not update existing copies.
+For every change size, existing task records hold only short check results and
+material failures/findings; full logs and UI-test protocols stay in PR/CI.
+
 ---
 
 ## Architecture
